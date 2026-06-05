@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.app.json",
+    "cdk": "cdk",
+    "synth": "cdk synth --app \"npx tsx infra/bin/app.ts\" --quiet",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -22,12 +24,22 @@
     "licenses": "license-checker --production --json --out THIRD_PARTY_LICENSES.json && license-checker --production --failOn 'GPL-2.0;GPL-3.0;AGPL-1.0;AGPL-3.0'",
     "prepare": "lefthook install"
   },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "^3.1062.0",
+    "@aws-sdk/client-sqs": "^3.1062.0",
+    "aws-cdk-lib": "^2.258.0",
+    "constructs": "^10.6.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
+    "@types/aws-lambda": "^8.10.158",
     "@types/node": "^25.9.1",
     "@vitest/coverage-v8": "^4.1.8",
+    "aws-cdk": "^2.1007.0",
+    "aws-sdk-client-mock": "^4.1.0",
     "lefthook": "^2.1.9",
     "license-checker": "^25.0.1",
+    "tsx": "^4.19.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   }
