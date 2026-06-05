@@ -1,0 +1,65 @@
+{
+  "permissions": {
+    "deny": [
+      "~/.ssh/**",
+      "~/.aws/**",
+      "~/.gcp/**",
+      "~/.azure/**",
+      "**/*.env",
+      "**/*.pem",
+      "**/*.key",
+      "**/.env",
+      "**/.env.*",
+      "**/id_rsa",
+      "**/id_ed25519",
+      "**/credentials.json",
+      "**/service-account*.json"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/audit-log.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/block-dangerous-git.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/scan-commit.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-package-hallucination.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/scan-secrets.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read|WebFetch|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/prompt-injection-defender.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.node_repl_history
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+.tsbuildinfo
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets/
+credentials.json
+service-account.json
+*_rsa
+*_dsa
+*_ecdsa
+*_ed25519
+*.ppk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist-info/
+.eggs/
+*.egg
+
+# Biome cache
+.biome/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+audit-log/
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# License output (auto-generated, committed separately)
+THIRD_PARTY_LICENSES.json
+NOTICE
