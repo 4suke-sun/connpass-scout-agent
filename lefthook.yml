@@ -1,0 +1,41 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome-lint:
+      glob: "*.{ts,tsx,js,jsx,json}"
+      run: npx @biomejs/biome lint --write {staged_files}
+      stage_fixed: true
+
+    biome-format:
+      glob: "*.{ts,tsx,js,jsx,json}"
+      run: npx @biomejs/biome format --write {staged_files}
+      stage_fixed: true
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: npx tsc --noEmit
+
+    gitleaks:
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks protect --staged --redact --config .gitleaks.toml || (echo "⛔ Secrets detected by gitleaks. Commit blocked." && exit 1)
+        else
+          echo "ℹ️  gitleaks not installed locally — CI gitleaks.yml will enforce this check."
+        fi
+
+pre-push:
+  commands:
+    tests:
+      run: npm test
+      fail_text: "⛔ Tests must pass before push."
+
+    audit:
+      run: npm audit --audit-level=high
+      fail_text: "⛔ High/Critical vulnerabilities detected. Run 'npm audit' for details."
+
+    no-force-push:
+      run: |
+        if echo "$LEFTHOOK_GIT_ARGS" | grep -q "\-\-force"; then
+          echo "⛔ Force push is prohibited by project policy."
+          exit 1
+        fi
