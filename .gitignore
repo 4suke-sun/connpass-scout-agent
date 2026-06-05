@@ -55,6 +55,15 @@ dist-info/
 # Biome cache
 .biome/
 
+# CDK synth output
+cdk.out/
+**/cdk.out/
+*.cdk.staging/
+
+# Python tooling caches
+.pytest_cache/
+.ruff_cache/
+
 # OS
 .DS_Store
 .DS_Store?

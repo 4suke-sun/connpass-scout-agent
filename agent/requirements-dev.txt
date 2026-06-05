@@ -1,0 +1,8 @@
+# Test/lint dependencies. strands/bedrock-agentcore は含めない
+# （tools の純関数ロジックのみをテストするため）。
+boto3>=1.34
+requests>=2.32
+pytest>=8.0
+requests-mock>=1.12
+moto[dynamodb]>=5.0
+ruff>=0.6

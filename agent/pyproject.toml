@@ -1,0 +1,20 @@
+[project]
+name = "connpass-scout-agent"
+version = "0.1.0"
+description = "connpass scout agent runtime (Strands Agents on Bedrock AgentCore)"
+requires-python = ">=3.12"
+readme = "README.md"
+
+[tool.ruff]
+line-length = 119
+target-version = "py312"
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
