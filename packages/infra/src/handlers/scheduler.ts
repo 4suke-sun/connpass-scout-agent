@@ -20,7 +20,7 @@ function requireEnv(name: string): string {
 const AGENT_RUNTIME_ARN = requireEnv("AGENT_RUNTIME_ARN");
 const SLACK_BOT_TOKEN_PARAMETER = requireEnv("SLACK_BOT_TOKEN_PARAMETER");
 const SLACK_CHANNEL_ID = requireEnv("SLACK_CHANNEL_ID");
-const SEARCH_KEYWORDS = process.env["SEARCH_KEYWORDS"] ?? "TypeScript,AWS,クラウド,AI";
+const SEARCH_KEYWORDS = process.env["SEARCH_KEYWORDS"] ?? "JAWS,AWS,AI";
 
 const ssmClient = new SSMClient({});
 const agentCoreClient = new BedrockAgentCoreClient({});
