@@ -77,7 +77,17 @@ async function invokeAgent(prompt: string, sessionId: string): Promise<string> {
 }
 
 async function postToSlackThread(token: string, channel: string, threadTs: string, text: string): Promise<void> {
-  const body = JSON.stringify({ channel, thread_ts: threadTs, text });
+  const body = JSON.stringify({
+    channel,
+    thread_ts: threadTs,
+    blocks: [
+      {
+        type: "section",
+        text: { type: "mrkdwn", text },
+      },
+    ],
+    text, // fallback for notifications
+  });
 
   const res = await fetch("https://slack.com/api/chat.postMessage", {
     method: "POST",
@@ -131,8 +141,8 @@ export async function handler(event: SQSEvent): Promise<void> {
       }
 
       // thread_ts をセッション ID として使い、スレッド内で会話を継続
-      // AgentCore の runtimeSessionId は 33文字以上必要なため、プレフィックスを付ける
-      const sessionId = `slack-thread-${message.threadTs.replace(".", "-")}`;
+      // AgentCore の runtimeSessionId は 33文字以上必要なため、固定プレフィックスで長さを確保
+      const sessionId = `connpass-scout-slack-thread-${message.threadTs.replace(".", "-")}`.padEnd(33, "0");
 
       const agentReply = await invokeAgent(prompt, sessionId);
       await postToSlackThread(slackToken, message.channel, message.threadTs, agentReply);

@@ -10,10 +10,23 @@ const DEFAULT_MODEL_ID = "global.amazon.nova-2-lite-v1:0";
 
 const SYSTEM_PROMPT = `あなたは connpass のイベント情報からユーザーの興味分野に合うものを探して紹介するアシスタントです。
 
+## ルール
 - ユーザーから興味分野(キーワードやハッシュタグ)を受け取ったら search_connpass_events ツールで検索してください
-- 検索結果は日本語で簡潔に要約し、各イベントについてタイトル・開催日時・開催場所・参加者数・URL を箇条書きで提示してください
 - 該当するイベントが見つからない場合は、その旨を伝え、別のキーワードでの検索を提案してください
-- 推測でイベント情報を作り出さず、ツールの検索結果のみを根拠に回答してください`;
+- 推測でイベント情報を作り出さず、ツールの検索結果のみを根拠に回答してください
+- connpass API のレート制限があるため、複数キーワードの検索は1つずつ順番に実行してください
+
+## 出力フォーマット（Slack mrkdwn 形式）
+応答は必ず以下の Slack mrkdwn 形式で出力してください:
+
+- 各イベントは以下の形式:
+  • <URL|タイトル>
+  　📅 M/D HH:MM 👥 参加者/定員名
+  　_description を元にイベント内容を30文字以内で要約_
+- limit が null の場合は「定員なし」と表記
+- waiting が 0 でない場合は「(待ちN名)」を追加
+- 余計な前置きは最小限に。イベント一覧を中心に出力
+- URL は Slack のリンク形式 <URL|表示テキスト> を使うこと`;
 
 export interface ConnpassScoutAgentOptions {
   connpassClient: ConnpassClient;
