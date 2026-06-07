@@ -131,7 +131,10 @@ exports[`SchedulerStack > スタックを定義する_CloudFormationテンプレ
             {
               "Action": "bedrock-agentcore:InvokeAgentRuntime",
               "Effect": "Allow",
-              "Resource": "arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/connpass_scout_agent",
+              "Resource": [
+                "arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/connpass_scout_agent",
+                "arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/connpass_scout_agent/*",
+              ],
               "Sid": "InvokeAgentRuntime",
             },
             {
