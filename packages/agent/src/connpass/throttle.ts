@@ -27,6 +27,7 @@ export function createThrottler(minIntervalMs: number, clock: ThrottleClock = sy
       if (remaining > 0) {
         await clock.sleep(remaining);
       }
+      // task の成否に関わらず間隔を保つため、task 実行前(スケジューリング段階)で記録する
       lastRunAt = clock.now();
     });
     queue = scheduled;
