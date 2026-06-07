@@ -114,6 +114,57 @@ aws bedrock-agentcore invoke-agent-runtime \
 
 `{"reply": "..."}` 形式のレスポンスが返れば成功です。
 
+### デプロイ手順（Scheduler — 毎朝の定期実行）
+
+毎朝の自動実行には Slack App とその Bot Token が必要です。
+
+1. **Slack App を作成し、Bot Token を取得**
+
+   - [Slack API: Your Apps](https://api.slack.com/apps) から新規 App を作成
+   - **OAuth & Permissions** で以下の Bot Token Scopes を追加:
+     - `chat:write` — チャンネルへのメッセージ投稿
+   - App をワークスペースにインストールし、`xoxb-` で始まる Bot User OAuth Token を取得
+   - 投稿先チャンネルに Bot を招待 (`/invite @YourBot`)
+
+2. **SSM Parameter Store に Slack Bot Token を `SecureString` として登録**
+
+   ```bash
+   aws ssm put-parameter \
+     --name /connpass-scout-agent/slack/bot-token \
+     --type SecureString \
+     --value "xoxb-your-slack-bot-token" \
+     --profile <your-profile>
+   ```
+
+3. **CDK でスケジューラスタックをデプロイ**
+
+   ```bash
+   cd packages/infra
+   npx cdk deploy ConnpassScoutSchedulerStack \
+     --context slackChannelId=C01XXXXXXXX \
+     --context searchKeywords="TypeScript,AWS,クラウド" \
+     --profile <your-profile>
+   ```
+
+   - `slackChannelId`: 投稿先の Slack チャンネル ID（チャンネル詳細 → ID をコピー）
+   - `searchKeywords`: カンマ区切りの検索キーワード（省略時: `TypeScript,AWS,クラウド,AI`）
+
+4. **手動テスト（EventBridge ルールの即時トリガー）**
+
+   デプロイ後、EventBridge ルールを手動トリガーして動作確認できます:
+
+   ```bash
+   aws lambda invoke \
+     --function-name <出力された SchedulerFunctionArn の関数名部分> \
+     --payload '{}' \
+     --cli-binary-format raw-in-base64-out \
+     --profile <your-profile> \
+     /tmp/scheduler-response.json \
+   && cat /tmp/scheduler-response.json
+   ```
+
+   Slack チャンネルにダイジェストが投稿されれば成功です。
+
 ## ロードマップ
 
 小さく独立してマージ可能な単位で段階的に構築しています:
@@ -122,7 +173,7 @@ aws bedrock-agentcore invoke-agent-runtime \
 2. ✅ connpass API v2 クライアント（型付き・レート制限対応）
 3. ✅ エージェント定義（Strands Agents SDK + connpass検索ツール）
 4. ✅ Bedrock AgentCore Runtime へのデプロイ（CDK）
-5. 毎朝の定期実行（EventBridge Scheduler → Slack投稿）
+5. ✅ 毎朝の定期実行（EventBridge Scheduler → Slack投稿）
 6. Slack対話呼び出し（API Gateway → Lambda → SQS → AgentCore）
 
 ## 開発
