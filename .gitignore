@@ -8,10 +8,18 @@ yarn-error.log*
 
 # Build output
 dist/
+deploy/
 build/
 out/
 *.tsbuildinfo
 .tsbuildinfo
+
+# テストフィクスチャ(ビルド成果物のディレクトリ名と衝突するため明示的に除外解除)
+!packages/infra/test/fixtures/**/dist/
+!packages/infra/test/fixtures/**/dist/**
+
+# CDK
+cdk.out/
 
 # Coverage
 coverage/

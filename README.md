@@ -61,16 +61,64 @@ Concretely:
 - A Slack App with a bot token and signing secret (scopes such as `chat:write`, `app_mentions:read`, `commands`)
 - An AWS account with access to Amazon Bedrock AgentCore (available in `ap-northeast-1` / Tokyo, among other regions)
 
-Full deployment instructions will be documented as the infrastructure stages land (see Roadmap).
+### Deploying (AgentCore Runtime)
+
+1. **Store your connpass API key as a `SecureString` in SSM Parameter Store**
+
+   ```bash
+   aws ssm put-parameter \
+     --name /connpass-scout-agent/connpass/api-key \
+     --type SecureString \
+     --value "<your connpass API key>" \
+     --profile <your-profile>
+   ```
+
+2. **Build the agent's deployable package**
+
+   AgentCore Runtime's Node.js zip deployment doesn't work with npm workspaces' hoisted
+   `node_modules`, so this generates a self-contained deployable directory at `packages/agent/deploy/`.
+
+   ```bash
+   npm run package --workspace=@connpass-scout-agent/agent
+   ```
+
+3. **Deploy with CDK**
+
+   `cdk bootstrap` is only needed once per target region.
+
+   ```bash
+   cd packages/infra
+   npx cdk bootstrap --profile <your-profile>
+   npx cdk deploy --profile <your-profile>
+   ```
+
+   The deploy region is resolved from your AWS CLI profile / `AWS_REGION`
+   (falls back to `ap-northeast-1` if neither is set).
+
+### Smoke testing
+
+Use the `AgentRuntimeArn` printed after deployment to invoke the runtime directly via the AWS CLI:
+
+```bash
+aws bedrock-agentcore invoke-agent-runtime \
+  --agent-runtime-arn "<AgentRuntimeArn from the deploy output>" \
+  --payload '{"prompt": "Find me a TypeScript meetup"}' \
+  --content-type application/json \
+  --profile <your-profile> \
+  /tmp/connpass-scout-agent-response.json \
+&& cat /tmp/connpass-scout-agent-response.json
+```
+
+A response shaped like `{"reply": "..."}` means it's working.
 
 ## Roadmap
 
 Built in small, independently-mergeable stages:
 
 1. ✅ Project foundation (npm workspaces, conventions, CLAUDE.md)
-2. connpass API v2 client (typed, rate-limited)
-3. Agent definition (Strands Agents SDK + connpass search tool)
-4. Deploy to Bedrock AgentCore Runtime (CDK)
+2. ✅ connpass API v2 client (typed, rate-limited)
+3. ✅ Agent definition (Strands Agents SDK + connpass search tool)
+4. ✅ Deploy to Bedrock AgentCore Runtime (CDK)
 5. Daily scheduled digest (EventBridge Scheduler → Slack)
 6. Slack interactive search (API Gateway → Lambda → SQS → AgentCore)
 
