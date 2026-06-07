@@ -62,7 +62,7 @@ function toDigestEvent(event: ConnpassEvent): ConnpassSearchDigestEvent {
   return {
     title: event.title,
     catchCopy: event.catchCopy,
-    description: stripHtmlAndTruncate(event.description, 200),
+    description: stripHtmlAndTruncate(event.description, 400),
     url: event.url,
     hashTag: event.hashTag,
     startedAt: event.startedAt,
