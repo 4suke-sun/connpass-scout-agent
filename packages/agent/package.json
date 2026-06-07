@@ -10,5 +10,10 @@
     "dev": "tsc --watch",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@strands-agents/sdk": "^1.4.0",
+    "bedrock-agentcore": "^0.2.4",
+    "zod": "^4.4.3"
   }
 }
