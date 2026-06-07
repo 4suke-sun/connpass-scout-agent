@@ -142,12 +142,12 @@ aws bedrock-agentcore invoke-agent-runtime \
    cd packages/infra
    npx cdk deploy ConnpassScoutSchedulerStack \
      --context slackChannelId=C01XXXXXXXX \
-     --context searchKeywords="TypeScript,AWS,クラウド" \
+     --context searchKeywords="JAWS,AWS,AI" \
      --profile <your-profile>
    ```
 
    - `slackChannelId`: 投稿先の Slack チャンネル ID（チャンネル詳細 → ID をコピー）
-   - `searchKeywords`: カンマ区切りの検索キーワード（省略時: `TypeScript,AWS,クラウド,AI`）
+   - `searchKeywords`: カンマ区切りの検索キーワード（省略時: `JAWS,AWS,AI`）
 
 4. **手動テスト（EventBridge ルールの即時トリガー）**
 
