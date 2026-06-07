@@ -1,205 +1,94 @@
-# ai-auto-dev-framework
+# connpass-scout-agent
 
-> **⚠️ 研究用（Experimental）— 本番環境での利用は非推奨です**
+> 🚧 **開発中**
 >
-> このリポジトリは AI エージェント（Claude Code）を auto-mode で安全に稼働させるための規約・ガードレールを研究・検証する目的で公開しています。
-> 本番プロジェクトへの導入は十分な検証の上、自己責任で行ってください。
-> 仕様・構成は予告なく破壊的に変更される可能性があります。
+> 本プロジェクトは現在開発中です。進捗は下記の[ロードマップ](#ロードマップ)を参照してください。
 
 **[English README](../README.md)**
 
 ---
 
-Auto-mode で Claude Code を継続稼働させても事故ゼロを目指す「開発憲法」テンプレートリポジトリ。
-新規プロジェクトのスタート地点として使い、CI・フック・スキルが最初から揃った状態で開発を始められます。
+`connpass-scout-agent` は、技術コミュニティ向けイベントプラットフォーム [connpass](https://connpass.com/) から
+興味分野（キーワード／ハッシュタグ）に合致するイベントを検索し、次の2つの導線で届ける AI エージェントです。
 
-## 含まれるもの
+1. **毎朝のダイジェスト配信** — スケジュール実行で毎朝イベントを検索し、Slack チャンネルに要約を投稿
+2. **対話的な検索** — Slack でいつでもメンションして、その場で検索・会話形式でやり取り
 
-| レイヤー | 場所 | 役割 |
-|----------|------|------|
-| ガードフック | `.claude/hooks/` | 危険な操作をリアルタイムでブロック |
-| スキル | `.claude/skills/` | 人間の承認ゲート付き構造化ワークフロー |
-| CI ワークフロー | `.github/workflows/` | 自動品質・セキュリティゲート |
-| devcontainer | `.devcontainer/` | 隔離された再現可能な開発環境 |
-| エージェントガイド | `docs/agent-guides/` | 各フェーズの詳細手順 |
-| 開発憲法 | `CLAUDE.md` | AI エージェントが常時参照するルールブック |
+[Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) 上で動作する AI エージェントとして、
+TypeScript と [Strands Agents SDK](https://strandsagents.com/) を用いて構築しています。
 
-## クイックスタート
+## アーキテクチャ
 
-### 1. テンプレートからリポジトリを作成
+```
+EventBridge Scheduler ──▶ Lambda ──▶ Bedrock AgentCore Runtime ──▶ connpass API v2
+  (毎朝 cron)                          (Strands Agent + 検索ツール)      (X-API-Key, 1 req/sec)
+                                               │
+Slack (@mention) ──▶ API Gateway ──▶ Lambda ──▶ SQS ──▶ Lambda ──▶ (同 Runtime, セッション = スレッドts)
+                                                                          │
+                                                                          ▼
+                                                                  Slack channel / thread
+```
+
+インフラは AWS CDK v2 で定義します。秘密情報（connpass API キー、Slack の Bot Token / Signing Secret）は
+SSM Parameter Store に `SecureString` として格納し、リポジトリには一切含めません。
+
+## リポジトリ構成
+
+| パス | 役割 |
+|------|------|
+| `packages/agent/` | エージェント本体 — Bedrock AgentCore Runtime にデプロイ（Strands Agents SDK + connpass API v2 検索ツール） |
+| `packages/infra/` | AWS インフラ定義（CDK v2）: AgentCore Runtime, EventBridge Scheduler, Slack連携（API Gateway / Lambda / SQS） |
+| `.claude/` | [`ai-auto-dev-framework`](https://github.com/4suke-sun/ai-auto-dev-framework) から継承した Claude Code ガードレール（hooks, skills） |
+| `docs/agent-guides/` | このリポジトリでの AI 支援開発のフェーズ別ガイド |
+
+## セルフホスティングについて
+
+本プロジェクトは、**あなた自身の** AWS アカウント・connpass API キー・Slack ワークスペースにデプロイして使うことを
+前提としています。作者の認証情報やアカウント情報がリポジトリに含まれることは、設計上ありません。
+
+最初から徹底している原則:
+
+> 実際の認証情報（AWS アカウント情報・アクセスキー、connpass API キー、Slack トークン等）は
+> **絶対にコミットしない**。リポジトリに含めて良いのはダミーのプレースホルダー値のみで、
+> デプロイ前に各自の値に差し替える。
+
+具体的には:
+
+- `.env.example` にはダミー値のみを記載してコミットし、コピーした `.env`（gitignore済み）に各自の値を設定する
+- AWS のアカウント／リージョンは環境変数（`CDK_DEFAULT_ACCOUNT` / `CDK_DEFAULT_REGION`）から取得し、コードにハードコードしない
+- セットアップ手順は「作者の設定例」ではなく「あなた自身の認証情報を取得・設定する手順」として記述する
+
+### デプロイ前に各自で準備するもの
+
+- connpass API v2 キー — connpass の[個人/コミュニティ向け申請フォーム](https://help.connpass.com/api/)から申請（無料）
+- Bot Token と Signing Secret を持つ Slack App（`chat:write`, `app_mentions:read`, `commands` などの scope）
+- Amazon Bedrock AgentCore が利用できる AWS アカウント（Tokyo/`ap-northeast-1` を含む複数リージョンで提供）
+
+詳細なデプロイ手順は、インフラ部分の実装が進み次第ドキュメント化していきます（ロードマップ参照）。
+
+## ロードマップ
+
+小さく独立してマージ可能な単位で段階的に構築しています:
+
+1. ✅ プロジェクト基盤整備（npm workspaces化、規約整備、CLAUDE.md）
+2. connpass API v2 クライアント（型付き・レート制限対応）
+3. エージェント定義（Strands Agents SDK + connpass検索ツール）
+4. Bedrock AgentCore Runtime へのデプロイ（CDK）
+5. 毎朝の定期実行（EventBridge Scheduler → Slack投稿）
+6. Slack対話呼び出し（API Gateway → Lambda → SQS → AgentCore）
+
+## 開発
 
 ```bash
-gh repo create my-project --template 4suke-sun/ai-auto-dev-framework --private
-cd my-project
 npm install
+npm run lint && npm run typecheck && npm run test && npm run build
 ```
 
-または GitHub 上で **Use this template** ボタンをクリック。
+push 前にこの4つすべてがグリーンであること（lefthook と CI で強制）。
 
-### 2. プロジェクトに合わせてカスタマイズ
-
-| ファイル | やること |
-|----------|----------|
-| `src/` | スケルトンコードを削除し、自分のコードを配置 |
-| `package.json` | `name`, `description`, `version` を変更 |
-| `CLAUDE.md` | 「What（プロジェクトマップ）」セクションを自分のプロジェクト構成に書き換え |
-| `.github/CODEOWNERS` | レビュアーを自分のチームに変更 |
-| `tsconfig.json` | 必要に応じて `target` や `lib` を調整 |
-
-### 3. セットアップ確認
-
-```bash
-npm run lint         # Biome lint
-npm run typecheck    # TypeScript strict check
-npm run test         # Vitest
-npm run build        # コンパイル
-```
-
-4つすべてグリーンになれば準備完了。
-
-### 4. 開発開始
-
-```
-Claude Code を起動 → CLAUDE.md を読み込み → スキルに従って開発
-```
-
-### 5. GitHub Settings の設定（テンプレートから引き継がれない）
-
-以下の設定はテンプレートからコピーされません。いずれかの方法で設定してください:
-
-#### 方法 A: Claude Code で自動設定（推奨）
-
-Claude Code セッションでセットアップスキルを実行:
-
-```
-/setup-repository
-```
-
-`gh` CLI を使って Code Scanning、ブランチ保護、Auto-merge を自動構成します。
-
-#### 方法 B: GitHub Web UI で手動設定
-
-| 設定 | パス | 操作 |
-|------|------|------|
-| Code Scanning | Settings → Code security → Code scanning | 「Setup → Default」をクリックして CodeQL を有効化 |
-| ブランチ保護 | Settings → Branches → `main` のルールを追加 | PR 必須、ステータスチェック必須（Lint, Typecheck, Test & Coverage, Build）、CODEOWNERS レビュー必須を有効化 |
-| Auto-merge | Settings → General → Pull Requests | dependabot の自動マージを使う場合は「Allow auto-merge」を有効化 |
-
-> **注意（Free プランのプライベートリポ）:** CodeQL と Gitleaks の SARIF アップロードには GitHub Advanced Security が必要で、Free プランのプライベートリポでは利用できません。これらのワークフローは警告を出しますが CI をブロックしません。必要な場合は `codeql.yml` を削除するか、リポを public にしてください。
-
-## 開発フロー
-
-```
-issue 作成
-  ↓
-main から feature ブランチを作成（または dev 経由）
-  ↓
-ask-if-underspecified スキル（仕様が曖昧な場合）
-  ↓
-plan スキル → ユーザー承認待ち
-  ↓
-implement スキル（テストファースト）
-  ↓
-git-commit スキル（Conventional Commits）
-  ↓
-self-review-checklist スキル
-  ↓
-create-pull-request スキル
-  ↓
-CI 通過 + 人間レビュー → マージ（人間のみ）
-```
-
-## 主要な規約
-
-- **シークレット**: ハードコード禁止。`.env` 経由のみ。3層のフックで強制
-- **コミット**: [Conventional Commits](https://www.conventionalcommits.org/) — `type(scope): description`
-- **ブランチ**: GitHub Flow — 短命な feature ブランチ、squash merge で `main` に統合
-- **カバレッジ**: Lines ≥50% / Branches ≥40%（四半期ごとに引き上げ）
-- **マージ**: 人間のみ。AI は絶対にマージしない
-
-## Human-in-the-Loop ゲート
-
-Auto-mode は以下のポイントで停止し、人間の承認を待ちます:
-
-1. 実装前の計画承認（plan スキル）
-2. 認証操作（gh, クラウド CLI）
-3. CLAUDE.md 作成後のレビュー
-4. CI 失敗時
-5. PR マージ（常に人間）
-6. ブランチ保護の検証
-
-詳細: [docs/agent-guides/hitl-gates.md](agent-guides/hitl-gates.md)
-
-## セキュリティ
-
-| フック | タイミング | 役割 |
-|--------|-----------|------|
-| `scan-secrets.sh` | UserPromptSubmit | プロンプト内のシークレットをブロック |
-| `scan-commit.sh` | PreToolUse | ステージされた変更内のシークレットをブロック |
-| `block-dangerous-git.sh` | PreToolUse | force-push, reset --hard 等をブロック |
-| `prompt-injection-defender.sh` | PostToolUse | ツール出力のインジェクションパターンを警告 |
-| `check-package-hallucination.sh` | PreToolUse | 存在しないパッケージのインストールをブロック |
-| `gitleaks` | CI | 全履歴のシークレットスキャン |
-
-## CI ワークフロー
-
-| ワークフロー | 内容 | トリガー |
-|-------------|------|----------|
-| CI | Lint / Typecheck / Test & Coverage / Build | PR + main push |
-| CodeQL | 静的セキュリティ解析 | PR + main push + 週次 |
-| Gitleaks | シークレットスキャン | PR + main push |
-| License Check | GPL/AGPL 検出 | package.json 変更時 |
-| Security Review | npm audit (high+) | PR + main push + 週次 |
-| Auto-merge Dependabot | patch のみ自動 squash merge | dependabot PR |
-
-## カスタマイズガイド
-
-### 既存リポジトリへの導入
-
-既にプロジェクトがあり、後からガードレールを追加したい場合。
-
-#### ワンライナーで導入
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/4suke-sun/ai-auto-dev-framework/main/scripts/install.sh | bash
-```
-
-#### 手動で導入（中身を確認したい場合）
-
-```bash
-# フレームワークファイルを取得（クローンではない、履歴なし）
-git remote add framework https://github.com/4suke-sun/ai-auto-dev-framework.git
-git fetch framework main
-
-# ガードレールファイルをプロジェクトにコピー
-git checkout framework/main -- .claude/ CLAUDE.md .editorconfig .gitleaks.toml
-git checkout framework/main -- .github/workflows/gitleaks.yml .github/workflows/codeql.yml
-git checkout framework/main -- .github/workflows/security-review.yml .github/dependabot.yml
-git checkout framework/main -- .github/CODEOWNERS .github/pull_request_template.md
-
-# 一時リモートを削除
-git remote remove framework
-
-# コミット
-git add -A && git commit -m "chore: add ai-auto-dev-framework guardrails"
-```
-
-導入後、Claude Code を開いて `setup-repository` を実行すれば GitHub Settings も自動構成されます。
-
-詳細な手順（カスタマイズ含む）: [.claude/skills/install-framework/SKILL.md](../.claude/skills/install-framework/SKILL.md)
-
-### CI のジョブを増減したい
-
-`.github/workflows/ci.yml` を編集。ブランチ保護の required checks も GitHub Settings で合わせて変更。
-
-### スキルを追加したい
-
-`.claude/skills/<skill-name>/SKILL.md` を作成し、`CLAUDE.md` のスキル呼び出しルール表に追加。
-
-### 別の言語で使いたい
-
-`src/`、`tsconfig.json`、`biome.json` を削除し、対象言語のツールチェインに置き換え。
-CI の `npm run` コマンドも対応するものに変更。`.claude/skills/` と `CLAUDE.md` はそのまま使える。
+本リポジトリは [`ai-auto-dev-framework`](https://github.com/4suke-sun/ai-auto-dev-framework) の
+AI支援開発の規約に従っています。スキル・Human-in-the-Loopゲート・セキュリティポリシー等の詳細は
+[CLAUDE.md](../CLAUDE.md) と [docs/agent-guides/](agent-guides/) を参照してください。
 
 ## ライセンス
 
