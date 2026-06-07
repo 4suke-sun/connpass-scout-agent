@@ -5,8 +5,8 @@ import type { ConnpassEvent } from "../connpass/types.js";
 
 const DEFAULT_SEARCH_COUNT = 10;
 
-/** 開催日時順 (近い開催が先頭に来る) */
-const ORDER_BY_STARTED_AT = 2;
+/** 新着順 (最近登録されたイベントが先頭に来る。毎日異なる結果を返すため) */
+const ORDER_BY_NEWEST = 3;
 
 export const connpassSearchInputSchema = z.object({
   keywords: z
@@ -51,7 +51,7 @@ export function createConnpassSearchTool(client: ConnpassClient) {
       const result = await client.searchEvents({
         keyword: input.keywords,
         count: input.count ?? DEFAULT_SEARCH_COUNT,
-        order: ORDER_BY_STARTED_AT,
+        order: ORDER_BY_NEWEST,
       });
       return result.events.map(toDigestEvent);
     },

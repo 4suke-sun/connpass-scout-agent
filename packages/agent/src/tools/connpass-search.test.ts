@@ -45,7 +45,7 @@ describe("createConnpassSearchTool", () => {
 
     await searchTool.invoke({ keywords: ["TypeScript", "#kanagawapy"] });
 
-    expect(calls).toEqual([{ keyword: ["TypeScript", "#kanagawapy"], count: 10, order: 2 }]);
+    expect(calls).toEqual([{ keyword: ["TypeScript", "#kanagawapy"], count: 10, order: 3 }]);
   });
 
   it("件数を指定した場合_その件数をconnpassクライアントへ渡す", async () => {
@@ -59,7 +59,7 @@ describe("createConnpassSearchTool", () => {
 
     await searchTool.invoke({ keywords: ["AWS"], count: 5 });
 
-    expect(calls).toEqual([{ keyword: ["AWS"], count: 5, order: 2 }]);
+    expect(calls).toEqual([{ keyword: ["AWS"], count: 5, order: 3 }]);
   });
 
   it("検索結果が返る場合_LLMが要約しやすい形にイベントを整形する", async () => {
