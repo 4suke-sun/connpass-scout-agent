@@ -165,6 +165,50 @@ aws bedrock-agentcore invoke-agent-runtime \
 
    Slack チャンネルにダイジェストが投稿されれば成功です。
 
+### デプロイ手順（Slack 対話呼び出し）
+
+Slack でメンション (`@bot`) して対話的にイベント検索する機能です。
+
+1. **Slack App に追加の scope と Event Subscriptions を設定**
+
+   - **OAuth & Permissions** で以下の Bot Token Scopes を追加（Scheduler 用に加えて）:
+     - `app_mentions:read` — メンションイベントの受信
+   - **Event Subscriptions** を有効化（Request URL はデプロイ後に設定）
+   - **Subscribe to bot events** で `app_mention` を追加
+
+2. **SSM Parameter Store に Slack Signing Secret を登録**
+
+   ```bash
+   aws ssm put-parameter \
+     --name /connpass-scout-agent/slack/signing-secret \
+     --type SecureString \
+     --value "<Slack App の Signing Secret>" \
+     --profile <your-profile>
+   ```
+
+   Signing Secret は Slack App の **Basic Information** → **App Credentials** から取得できます。
+
+3. **CDK で Slack 連携スタックをデプロイ**
+
+   ```bash
+   cd packages/infra
+   npx cdk deploy ConnpassScoutSlackIntegrationStack --profile <your-profile>
+   ```
+
+4. **Slack App の Event Subscriptions に Request URL を設定**
+
+   デプロイ出力の `SlackEventsEndpoint` (例: `https://xxxx.execute-api.ap-northeast-1.amazonaws.com/prod/slack/events`)
+   を Slack App の **Event Subscriptions** → **Request URL** に貼り付けます。
+   `Verified ✓` と表示されれば設定完了です。
+
+5. **検証**
+
+   Slack でボットにメンションして動作確認:
+   ```
+   @connpass-scout-agent TypeScript の勉強会を探して
+   ```
+   スレッド内に検索結果が返信されれば成功です。同じスレッド内で追加の質問をすると会話が継続します。
+
 ## ロードマップ
 
 小さく独立してマージ可能な単位で段階的に構築しています:
@@ -174,7 +218,7 @@ aws bedrock-agentcore invoke-agent-runtime \
 3. ✅ エージェント定義（Strands Agents SDK + connpass検索ツール）
 4. ✅ Bedrock AgentCore Runtime へのデプロイ（CDK）
 5. ✅ 毎朝の定期実行（EventBridge Scheduler → Slack投稿）
-6. Slack対話呼び出し（API Gateway → Lambda → SQS → AgentCore）
+6. ✅ Slack対話呼び出し（API Gateway → Lambda → SQS → AgentCore）
 
 ## 開発
 
