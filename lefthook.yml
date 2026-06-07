@@ -13,7 +13,7 @@ pre-commit:
 
     typecheck:
       glob: "*.{ts,tsx}"
-      run: npx tsc --noEmit
+      run: npm run typecheck
 
     gitleaks:
       run: |

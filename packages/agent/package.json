@@ -1,0 +1,14 @@
+{
+  "name": "@connpass-scout-agent/agent",
+  "version": "0.1.0",
+  "description": "connpass イベント検索エージェント本体（Bedrock AgentCore Runtime にデプロイ）",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  }
+}

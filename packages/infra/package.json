@@ -1,0 +1,14 @@
+{
+  "name": "@connpass-scout-agent/infra",
+  "version": "0.1.0",
+  "description": "connpass-scout-agent の AWS インフラ定義（CDK v2）",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  }
+}

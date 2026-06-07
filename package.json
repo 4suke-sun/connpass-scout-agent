@@ -1,16 +1,20 @@
 {
-  "name": "ai-auto-dev-framework",
+  "name": "connpass-scout-agent",
   "version": "0.1.0",
-  "description": "Auto-mode safe development framework for Claude Code",
+  "description": "connpass のイベントを興味分野で検索する Bedrock AgentCore エージェント（毎朝の定期実行 + Slack対話呼び出し）",
+  "private": true,
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
