@@ -1,11 +1,15 @@
-# ai-auto-dev-framework — Claude Code 開発憲法
+# connpass-scout-agent — Claude Code 開発憲法
 
 ## Why
-Auto-mode で Claude Code を継続稼働させても事故ゼロになる規約・ガードレール一式。
-他プロジェクトの template として使われる「開発憲法」リポジトリ。
+connpass のイベントを興味分野（キーワード/ハッシュタグ）で検索し、「毎朝の定期実行」と
+「Slack上での対話的な呼び出し」の両方に対応する AI エージェントを Amazon Bedrock AgentCore 上に構築するプロジェクト。
+`ai-auto-dev-framework` テンプレートを土台に、Auto-mode で Claude Code を継続稼働させても
+事故ゼロになる規約・ガードレールを適用する。
 
 ## What（プロジェクトマップ）
-- `src/` — TypeScript ソース（strict mode）
+- `packages/agent/` — Bedrock AgentCore Runtime にデプロイするエージェント本体
+  （Strands Agents SDK + connpass API v2 検索ツール）
+- `packages/infra/` — AWS インフラ定義（CDK v2: AgentCore Runtime, EventBridge Scheduler, Slack連携の Lambda/API Gateway/SQS）
 - `.claude/skills/` — 各フェーズで呼ぶスキル群
 - `.claude/hooks/` — 自動実行される安全装置
 - `docs/agent-guides/` — AI 向け詳細ガイド
