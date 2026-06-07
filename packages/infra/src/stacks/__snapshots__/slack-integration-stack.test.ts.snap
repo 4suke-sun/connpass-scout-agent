@@ -1,0 +1,597 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SlackIntegrationStack > スタックを定義する_CloudFormationテンプレートのスナップショットと一致する 1`] = `
+{
+  "Outputs": {
+    "SlackEventsApiEndpoint6866D8AC": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "SlackEventsApi71FAF953",
+            },
+            ".execute-api.ap-northeast-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "SlackEventsApiDeploymentStageprod739903DF",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+    "SlackEventsEndpoint": {
+      "Description": "Slack Event Subscriptions に設定する Request URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "SlackEventsApi71FAF953",
+            },
+            ".execute-api.ap-northeast-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "SlackEventsApiDeploymentStageprod739903DF",
+            },
+            "/slack/events",
+          ],
+        ],
+      },
+    },
+    "SlackProcessFunctionArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "SlackProcessFunction0566D332",
+          "Arn",
+        ],
+      },
+    },
+    "SlackVerifyFunctionArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "SlackVerifyFunctionF2C3FDB8",
+          "Arn",
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "SlackEventsApi71FAF953": {
+      "Properties": {
+        "Description": "connpass-scout-agent Slack Event Subscriptions エンドポイント",
+        "Name": "connpass-scout-slack-events",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "SlackEventsApiAccount5AC29F60": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "SlackEventsApi71FAF953",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "SlackEventsApiCloudWatchRoleC834F707",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SlackEventsApiCloudWatchRoleC834F707": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SlackEventsApiDeployment13EA6FC561fc820558ad8ba47a88d49f0684c6c7": {
+      "DependsOn": [
+        "SlackEventsApislackeventsPOSTB69CD511",
+        "SlackEventsApislackeventsB145ECE3",
+        "SlackEventsApislack3C364615",
+      ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "Description": "connpass-scout-agent Slack Event Subscriptions エンドポイント",
+        "RestApiId": {
+          "Ref": "SlackEventsApi71FAF953",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "SlackEventsApiDeploymentStageprod739903DF": {
+      "DependsOn": [
+        "SlackEventsApiAccount5AC29F60",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "SlackEventsApiDeployment13EA6FC561fc820558ad8ba47a88d49f0684c6c7",
+        },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 50,
+            "ThrottlingRateLimit": 100,
+          },
+        ],
+        "RestApiId": {
+          "Ref": "SlackEventsApi71FAF953",
+        },
+        "StageName": "prod",
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "SlackEventsApislack3C364615": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "SlackEventsApi71FAF953",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "slack",
+        "RestApiId": {
+          "Ref": "SlackEventsApi71FAF953",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "SlackEventsApislackeventsB145ECE3": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "SlackEventsApislack3C364615",
+        },
+        "PathPart": "events",
+        "RestApiId": {
+          "Ref": "SlackEventsApi71FAF953",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "SlackEventsApislackeventsPOSTApiPermissionTestSlackIntegrationStackSlackEventsApiA2E3B91BPOSTslackevents1F662380": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SlackVerifyFunctionF2C3FDB8",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:ap-northeast-1:123456789012:",
+              {
+                "Ref": "SlackEventsApi71FAF953",
+              },
+              "/",
+              {
+                "Ref": "SlackEventsApiDeploymentStageprod739903DF",
+              },
+              "/POST/slack/events",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "SlackEventsApislackeventsPOSTApiPermissionTestTestSlackIntegrationStackSlackEventsApiA2E3B91BPOSTslackeventsB1C3B797": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SlackVerifyFunctionF2C3FDB8",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:ap-northeast-1:123456789012:",
+              {
+                "Ref": "SlackEventsApi71FAF953",
+              },
+              "/test-invoke-stage/POST/slack/events",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "SlackEventsApislackeventsPOSTB69CD511": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "SlackVerifyFunctionF2C3FDB8",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "SlackEventsApislackeventsB145ECE3",
+        },
+        "RestApiId": {
+          "Ref": "SlackEventsApi71FAF953",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "SlackEventsDLQFBB10A1D": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SlackEventsQueue88278689": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "SlackEventsDLQFBB10A1D",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "VisibilityTimeout": 360,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SlackProcessFunction0566D332": {
+      "DependsOn": [
+        "SlackProcessFunctionServiceRoleDefaultPolicyABEB9FB2",
+        "SlackProcessFunctionServiceRole6B097EB1",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-ap-northeast-1",
+          "S3Key": "ASSET_HASH_PLACEHOLDER.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "AGENT_RUNTIME_ARN": "arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/connpass_scout_agent",
+            "SLACK_BOT_TOKEN_PARAMETER": "/connpass-scout-agent/slack/bot-token",
+          },
+        },
+        "Handler": "index.handler",
+        "MemorySize": 256,
+        "Role": {
+          "Fn::GetAtt": [
+            "SlackProcessFunctionServiceRole6B097EB1",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "SlackProcessFunctionServiceRole6B097EB1": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SlackProcessFunctionServiceRoleDefaultPolicyABEB9FB2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SlackEventsQueue88278689",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "bedrock-agentcore:InvokeAgentRuntime",
+              "Effect": "Allow",
+              "Resource": "arn:aws:bedrock-agentcore:ap-northeast-1:123456789012:runtime/connpass_scout_agent",
+              "Sid": "InvokeAgentRuntime",
+            },
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ssm:ap-northeast-1:123456789012:parameter/connpass-scout-agent/slack/bot-token",
+                  ],
+                ],
+              },
+              "Sid": "ReadSlackBotToken",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SlackProcessFunctionServiceRoleDefaultPolicyABEB9FB2",
+        "Roles": [
+          {
+            "Ref": "SlackProcessFunctionServiceRole6B097EB1",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SlackProcessFunctionSqsEventSourceTestSlackIntegrationStackSlackEventsQueue696CA740F8F120BC": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "SlackEventsQueue88278689",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "SlackProcessFunction0566D332",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "SlackVerifyFunctionF2C3FDB8": {
+      "DependsOn": [
+        "SlackVerifyFunctionServiceRoleDefaultPolicy89599A15",
+        "SlackVerifyFunctionServiceRoleF8A65616",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-ap-northeast-1",
+          "S3Key": "ASSET_HASH_PLACEHOLDER.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "QUEUE_URL": {
+              "Ref": "SlackEventsQueue88278689",
+            },
+            "SLACK_SIGNING_SECRET_PARAMETER": "/connpass-scout-agent/slack/signing-secret",
+          },
+        },
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "SlackVerifyFunctionServiceRoleF8A65616",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Timeout": 10,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "SlackVerifyFunctionServiceRoleDefaultPolicy89599A15": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ssm:ap-northeast-1:123456789012:parameter/connpass-scout-agent/slack/signing-secret",
+                  ],
+                ],
+              },
+              "Sid": "ReadSlackSigningSecret",
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SlackEventsQueue88278689",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SlackVerifyFunctionServiceRoleDefaultPolicy89599A15",
+        "Roles": [
+          {
+            "Ref": "SlackVerifyFunctionServiceRoleF8A65616",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SlackVerifyFunctionServiceRoleF8A65616": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
