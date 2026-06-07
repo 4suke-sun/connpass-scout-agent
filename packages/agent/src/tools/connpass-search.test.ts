@@ -62,7 +62,7 @@ describe("createConnpassSearchTool", () => {
     expect(calls).toEqual([{ keyword: ["AWS"], count: 5, order: 2 }]);
   });
 
-  it("検索結果が返る場合_LLMが要約しやすい形にイベントを整形し説明文(HTML)は含めない", async () => {
+  it("検索結果が返る場合_LLMが要約しやすい形にイベントを整形する", async () => {
     const { client } = createFakeConnpassClient({
       resultsStart: 1,
       resultsReturned: 1,
@@ -77,6 +77,7 @@ describe("createConnpassSearchTool", () => {
       {
         title: "TypeScript勉強会",
         catchCopy: "型のある世界へようこそ",
+        description: "説明(HTML)",
         url: "https://connpass.com/event/12345/",
         hashTag: "tsstudy",
         startedAt: "2026-06-10T19:00:00+09:00",
@@ -84,12 +85,10 @@ describe("createConnpassSearchTool", () => {
         place: "オンライン",
         address: "東京都渋谷区",
         accepted: 20,
+        waiting: 0,
         limit: 30,
       },
     ]);
-    for (const event of result as Record<string, unknown>[]) {
-      expect(event).not.toHaveProperty("description");
-    }
   });
 
   it("検索結果が0件の場合_空配列を返す", async () => {

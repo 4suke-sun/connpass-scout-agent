@@ -1,3 +1,4 @@
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { TextBlock, type AgentResult, type Message } from "@strands-agents/sdk";
 import { BedrockAgentCoreApp } from "bedrock-agentcore/runtime";
 import { z } from "zod";
@@ -22,6 +23,21 @@ function requireEnv(name: string): string {
   return value;
 }
 
+/**
+ * SSM Parameter Store から SecureString を取得する。
+ * AgentCore Runtime の環境変数は平文文字列のみ対応のため、
+ * パラメータ「名」を環境変数で受け取り、ランタイム内で値を解決する。
+ */
+async function getSSMParameter(parameterName: string): Promise<string> {
+  const client = new SSMClient({});
+  const result = await client.send(new GetParameterCommand({ Name: parameterName, WithDecryption: true }));
+  const value = result.Parameter?.Value;
+  if (!value) {
+    throw new Error(`SSM パラメータ ${parameterName} の値が空です`);
+  }
+  return value;
+}
+
 function extractReplyText(message: Message): string {
   return message.content
     .filter((block): block is TextBlock => block instanceof TextBlock)
@@ -29,8 +45,11 @@ function extractReplyText(message: Message): string {
     .join("");
 }
 
+// SSM から connpass API キーを取得してからエージェントを初期化する
+const connpassApiKey = await getSSMParameter(requireEnv("CONNPASS_API_KEY_SSM_NAME"));
+
 const connpassClient = createConnpassClient({
-  apiKey: requireEnv("CONNPASS_API_KEY"),
+  apiKey: connpassApiKey,
   userAgent: process.env["CONNPASS_USER_AGENT"] ?? DEFAULT_USER_AGENT,
 });
 

@@ -3,8 +3,8 @@ import type { ConnpassEvent, ConnpassEventSearchParams, ConnpassEventSearchResul
 
 const SEARCH_EVENTS_URL = "https://connpass.com/api/v2/events/";
 
-/** connpass API v2 のレート制限 (1 req/sec) を遵守するための既定間隔 */
-const RATE_LIMIT_INTERVAL_MS = 1000;
+/** connpass API v2 のレート制限を遵守するための既定間隔（余裕を持って2秒） */
+const RATE_LIMIT_INTERVAL_MS = 2000;
 
 export interface HttpResponse {
   readonly ok: boolean;
@@ -49,14 +49,7 @@ export function createConnpassClient(options: ConnpassClientOptions): ConnpassCl
   return {
     async searchEvents(params = {}): Promise<ConnpassEventSearchResult> {
       const url = buildSearchUrl(params);
-      const response = await throttle(() =>
-        fetchImpl(url, {
-          headers: {
-            "X-API-Key": options.apiKey,
-            "User-Agent": options.userAgent,
-          },
-        }),
-      );
+      const response = await throttle(() => fetchWithRetry(fetchImpl, url, options));
 
       if (!response.ok) {
         throw new ConnpassApiError(response.status, await response.text());
@@ -65,6 +58,40 @@ export function createConnpassClient(options: ConnpassClientOptions): ConnpassCl
       return toSearchResult((await response.json()) as RawEventSearchResponse);
     },
   };
+}
+
+/** 429 (Rate Limited) に対してエクスポネンシャルバックオフでリトライする */
+async function fetchWithRetry(
+  fetchImpl: FetchLike,
+  url: string,
+  options: ConnpassClientOptions,
+  maxRetries = 3,
+): Promise<HttpResponse> {
+  let lastResponse: HttpResponse | undefined;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await fetchImpl(url, {
+      headers: {
+        "X-API-Key": options.apiKey,
+        "User-Agent": options.userAgent,
+      },
+    });
+
+    if (response.status !== 429) {
+      return response;
+    }
+
+    lastResponse = response;
+
+    if (attempt < maxRetries) {
+      // エクスポネンシャルバックオフ: 2秒, 4秒, 8秒
+      const backoffMs = 2000 * 2 ** attempt;
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    }
+  }
+
+  // 全リトライ失敗 → 最後の 429 レスポンスを返す
+  return lastResponse!;
 }
 
 function buildSearchUrl(params: ConnpassEventSearchParams): string {

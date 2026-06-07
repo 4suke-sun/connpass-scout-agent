@@ -52,11 +52,12 @@ export class SchedulerStack extends cdk.Stack {
     });
 
     // AgentCore Runtime 呼び出し権限
+    // InvokeAgentRuntime は runtime-endpoint/DEFAULT サブリソースに対しても必要
     schedulerFn.addToRolePolicy(
       new iam.PolicyStatement({
         sid: "InvokeAgentRuntime",
         actions: ["bedrock-agentcore:InvokeAgentRuntime"],
-        resources: [props.agentRuntimeArn],
+        resources: [props.agentRuntimeArn, `${props.agentRuntimeArn}/*`],
       }),
     );
 
