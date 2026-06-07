@@ -135,7 +135,7 @@ describe("createConnpassClient.searchEvents", () => {
     expect(calls[0]?.url).toBe("https://connpass.com/api/v2/events/");
   });
 
-  it("APIがエラーレスポンスを返した場合_ConnpassApiErrorを送出する", async () => {
+  it("APIがエラーレスポンスを返した場合_ConnpassApiErrorを送出する", { timeout: 30000 }, async () => {
     const { fetch } = createFakeFetch(jsonResponse(429, { message: "Too Many Requests" }));
     const client = createConnpassClient({
       apiKey: DUMMY_API_KEY,

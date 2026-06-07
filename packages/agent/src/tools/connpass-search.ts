@@ -28,6 +28,7 @@ export type ConnpassSearchInput = z.infer<typeof connpassSearchInputSchema>;
 export type ConnpassSearchDigestEvent = {
   title: string;
   catchCopy: string;
+  description: string;
   url: string;
   hashTag: string;
   startedAt: string;
@@ -35,6 +36,7 @@ export type ConnpassSearchDigestEvent = {
   place: string | null;
   address: string | null;
   accepted: number;
+  waiting: number;
   limit: number | null;
 };
 
@@ -60,6 +62,7 @@ function toDigestEvent(event: ConnpassEvent): ConnpassSearchDigestEvent {
   return {
     title: event.title,
     catchCopy: event.catchCopy,
+    description: stripHtmlAndTruncate(event.description, 200),
     url: event.url,
     hashTag: event.hashTag,
     startedAt: event.startedAt,
@@ -67,6 +70,25 @@ function toDigestEvent(event: ConnpassEvent): ConnpassSearchDigestEvent {
     place: event.place,
     address: event.address,
     accepted: event.accepted,
+    waiting: event.waiting,
     limit: event.limit,
   };
+}
+
+/** HTML タグを除去し、プレーンテキストを maxLength 文字に切り詰める */
+function stripHtmlAndTruncate(html: string, maxLength: number): string {
+  // HTMLタグ除去
+  const text = html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#\d+;/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength)}…`;
 }

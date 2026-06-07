@@ -59,7 +59,7 @@ exports[`AgentRuntimeStack > スタックを定義する_CloudFormationテンプ
         "Description": "connpass のイベントを興味分野で検索し、日本語で要約して提示するエージェント",
         "EnvironmentVariables": {
           "BEDROCK_REGION": "ap-northeast-1",
-          "CONNPASS_API_KEY": "{{resolve:ssm-secure:/connpass-scout-agent/connpass/api-key}}",
+          "CONNPASS_API_KEY_SSM_NAME": "/connpass-scout-agent/connpass/api-key",
         },
         "LifecycleConfiguration": {},
         "NetworkConfiguration": {
@@ -268,6 +268,23 @@ exports[`AgentRuntimeStack > スタックを定義する_CloudFormationテンプ
                 },
               ],
               "Sid": "InvokeNovaModels",
+            },
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ssm:ap-northeast-1:123456789012:parameter/connpass-scout-agent/connpass/api-key",
+                  ],
+                ],
+              },
+              "Sid": "ReadConnpassApiKey",
             },
             {
               "Action": [

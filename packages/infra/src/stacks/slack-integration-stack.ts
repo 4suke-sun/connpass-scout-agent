@@ -105,11 +105,12 @@ export class SlackIntegrationStack extends cdk.Stack {
     );
 
     // AgentCore Runtime 呼び出し権限
+    // InvokeAgentRuntime は runtime-endpoint/DEFAULT サブリソースに対しても必要
     processFn.addToRolePolicy(
       new iam.PolicyStatement({
         sid: "InvokeAgentRuntime",
         actions: ["bedrock-agentcore:InvokeAgentRuntime"],
-        resources: [props.agentRuntimeArn],
+        resources: [props.agentRuntimeArn, `${props.agentRuntimeArn}/*`],
       }),
     );
 

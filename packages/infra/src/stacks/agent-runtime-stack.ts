@@ -31,10 +31,9 @@ export class AgentRuntimeStack extends cdk.Stack {
         entrypoint: ["dist/index.js"],
       }),
       environmentVariables: {
-        // SSM の動的参照 ({{resolve:ssm-secure:...}}) として解決される。
-        // CloudFormation がデプロイ時にデプロイ実行者の権限で解決するため、
-        // Runtime 実行ロールに ssm:GetParameter を追加する必要はない。
-        CONNPASS_API_KEY: cdk.SecretValue.ssmSecure(props.connpassApiKeyParameterName).unsafeUnwrap(),
+        // パラメータ「名」のみを渡し、ランタイム内で SSM から値を取得する。
+        // BedrockAgentCore::Runtime は ssm-secure 動的参照をサポートしないため。
+        CONNPASS_API_KEY_SSM_NAME: props.connpassApiKeyParameterName,
         BEDROCK_REGION: region,
         ...(props.bedrockModelId !== undefined ? { BEDROCK_MODEL_ID: props.bedrockModelId } : {}),
       },
@@ -52,6 +51,24 @@ export class AgentRuntimeStack extends cdk.Stack {
         resources: [
           `arn:${cdk.Aws.PARTITION}:bedrock:*::foundation-model/amazon.nova-*`,
           `arn:${cdk.Aws.PARTITION}:bedrock:*:${cdk.Aws.ACCOUNT_ID}:inference-profile/*amazon.nova-*`,
+        ],
+      }),
+    );
+
+    // ランタイム内で SSM SecureString から API キーを取得するための権限
+    this.runtime.addToRolePolicy(
+      new iam.PolicyStatement({
+        sid: "ReadConnpassApiKey",
+        actions: ["ssm:GetParameter"],
+        resources: [
+          cdk.Arn.format(
+            {
+              service: "ssm",
+              resource: "parameter",
+              resourceName: props.connpassApiKeyParameterName.replace(/^\//, ""),
+            },
+            this,
+          ),
         ],
       }),
     );
