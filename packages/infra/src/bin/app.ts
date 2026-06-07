@@ -2,6 +2,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as cdk from "aws-cdk-lib";
 import { AgentRuntimeStack } from "../stacks/agent-runtime-stack.js";
+import { SchedulerStack } from "../stacks/scheduler-stack.js";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 
@@ -13,11 +14,21 @@ const app = new cdk.App();
 
 const account = process.env["CDK_DEFAULT_ACCOUNT"];
 
-new AgentRuntimeStack(app, "ConnpassScoutAgentRuntimeStack", {
-  env: {
-    ...(account !== undefined ? { account } : {}),
-    region: process.env["CDK_DEFAULT_REGION"] ?? "ap-northeast-1",
-  },
+const env = {
+  ...(account !== undefined ? { account } : {}),
+  region: process.env["CDK_DEFAULT_REGION"] ?? "ap-northeast-1",
+};
+
+const runtimeStack = new AgentRuntimeStack(app, "ConnpassScoutAgentRuntimeStack", {
+  env,
   agentCodePath,
   connpassApiKeyParameterName: "/connpass-scout-agent/connpass/api-key",
+});
+
+new SchedulerStack(app, "ConnpassScoutSchedulerStack", {
+  env,
+  agentRuntimeArn: runtimeStack.runtime.agentRuntimeArn,
+  slackBotTokenParameterName: "/connpass-scout-agent/slack/bot-token",
+  slackChannelId: app.node.tryGetContext("slackChannelId") ?? "C00000000",
+  searchKeywords: app.node.tryGetContext("searchKeywords"),
 });
