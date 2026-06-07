@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/**/*.{test,spec}.ts"],
+    include: ["packages/*/src/**/*.{test,spec}.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
@@ -15,7 +15,7 @@ export default defineConfig({
         branches: 40,
         functions: 50,
       },
-      exclude: ["node_modules/**", "dist/**", "**/*.test.ts", "**/*.spec.ts", "vitest.config.ts"],
+      exclude: ["**/node_modules/**", "**/dist/**", "**/*.test.ts", "**/*.spec.ts", "vitest.config.ts"],
     },
   },
 });
