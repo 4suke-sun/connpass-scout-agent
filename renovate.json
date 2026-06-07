@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommits"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "automerge": false,
+      "reviewers": ["4sukeSuzuki"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "reviewers": ["4sukeSuzuki"],
+      "labels": ["dependencies", "breaking-change"]
+    },
+    {
+      "matchPackageNames": ["typescript", "@biomejs/biome"],
+      "automerge": false
+    }
+  ],
+  "schedule": ["before 9am on monday"],
+  "commitMessagePrefix": "chore(deps):",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2
+}
