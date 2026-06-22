@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.1063.0",
-    "@strands-agents/sdk": "^1.4.0",
+    "@strands-agents/sdk": "^1.6.0",
     "bedrock-agentcore": "^0.2.4",
     "zod": "^4.4.3"
   }
