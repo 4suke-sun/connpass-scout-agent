@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
-    "@types/node": "^25.9.3",
+    "@types/node": "^26.0.1",
     "@vitest/coverage-v8": "^4.1.9",
     "lefthook": "^2.1.9",
     "license-checker": "^25.0.1",
