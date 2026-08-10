@@ -43,7 +43,8 @@ connpass のイベントを興味分野（キーワード/ハッシュタグ）�
 ### ブランチ規約（GitHub Flow）
 - `main` — 常時デプロイ可能。直接 push 禁止
 - `feature/`, `fix/`, `chore/`, `refactor/`, `docs/`, `test/` + `#<issue>-<kebab-desc>`
-- Squash merge 固定、マージ後ブランチ削除
+- Merge commit 方式（squash 禁止）、マージ後ブランチ削除
+- merge commit 方式のため、ブランチ上の個々のコミットも Conventional Commits 準拠必須
 
 ### コミット規約
 Conventional Commits 厳守: `type(scope): description`
