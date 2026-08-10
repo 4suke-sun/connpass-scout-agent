@@ -4,9 +4,9 @@
 
 ```
 main ──────────────────────────────────── (always deployable)
-  └── feature/#123-add-auth ──── squash → main
-  └── fix/#456-null-check    ──── squash → main
-  └── chore/update-deps      ──── squash → main
+  └── feature/#123-add-auth ──── merge → main
+  └── fix/#456-null-check    ──── merge → main
+  └── chore/update-deps      ──── merge → main
 ```
 
 ## Branch Types
@@ -33,7 +33,8 @@ Examples:
 
 ## Merge Strategy
 
-- **Squash merge only** — keeps main history clean.
+- **Merge commit only** (no squash, no rebase-merge) — preserves branch topology in history.
+- Because branch commits land on main as-is, every commit must follow Conventional Commits.
 - Delete branch after merge.
 - Never merge `main` into a feature branch — rebase instead.
 
