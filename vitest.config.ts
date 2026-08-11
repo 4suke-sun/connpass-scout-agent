@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    // CDK スタックのシンセサイズ（esbuild バンドル含む）は時間がかかるため余裕を持たせる
+    testTimeout: 30000,
     include: ["packages/*/src/**/*.{test,spec}.ts"],
     coverage: {
       provider: "v8",
