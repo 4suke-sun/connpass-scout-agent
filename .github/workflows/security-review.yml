@@ -19,4 +19,44 @@ jobs:
           node-version: "22"
           cache: "npm"
       - run: npm ci
-      - run: npm audit --audit-level=high
+      - name: npm audit (CDK bundled deps を除外)
+        run: |
+          # aws-cdk-lib のバンドル依存に起因する脆弱性は上流修正待ちのため除外
+          # 除外対象: GHSA-rgw5-rvv9-x895 (brace-expansion in aws-cdk-lib)
+          IGNORED_GHSA="GHSA-rgw5-rvv9-x895"
+
+          AUDIT_JSON=$(npm audit --json 2>/dev/null || true)
+
+          FILTERED=$(echo "$AUDIT_JSON" | python3 -c "
+          import json, sys
+
+          ignored = set(sys.argv[1].split(','))
+          data = json.load(sys.stdin)
+          vulns = data.get('vulnerabilities', {})
+
+          failures = []
+          for name, info in vulns.items():
+              severity = info.get('severity', '')
+              if severity not in ('high', 'critical'):
+                  continue
+              for via in info.get('via', []):
+                  if not isinstance(via, dict):
+                      continue
+                  ghsa = via.get('url', '').split('/')[-1]
+                  if ghsa in ignored:
+                      continue
+                  failures.append({
+                      'package': name,
+                      'severity': severity,
+                      'ghsa': ghsa,
+                      'url': via.get('url', ''),
+                  })
+
+          if failures:
+              print('高・重大な脆弱性が検出されました:')
+              for f in failures:
+                  print(f\"  [{f['severity']}] {f['package']} - {f['url']}\")
+              sys.exit(1)
+          else:
+              print('除外リスト適用後、高・重大な脆弱性はありません。')
+          " "$IGNORED_GHSA")
