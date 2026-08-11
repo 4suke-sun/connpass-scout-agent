@@ -34,5 +34,8 @@
     "license-checker": "^25.0.1",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.264.0"
   }
 }
