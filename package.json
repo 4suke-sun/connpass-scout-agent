@@ -36,6 +36,6 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.264.0"
+    "aws-cdk-lib": "2.265.0"
   }
 }
