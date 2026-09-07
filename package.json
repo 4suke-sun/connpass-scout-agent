@@ -33,7 +33,7 @@
     "lefthook": "^2.1.12",
     "license-checker": "^25.0.1",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "aws-cdk-lib": "2.264.0"
